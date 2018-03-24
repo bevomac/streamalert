@@ -30,6 +30,8 @@ RuleAttributes = namedtuple('Rule', ['rule_name',
                                      'logs',
                                      'outputs',
                                      'req_subkeys',
+                                     'merge_window_mins',
+                                     'merge_by_keys',
                                      'context'])
 
 
@@ -77,6 +79,8 @@ class StreamRules(object):
             matchers = opts.get('matchers')
             datatypes = opts.get('datatypes')
             req_subkeys = opts.get('req_subkeys')
+            merge_window_mins = opts.get('merge_window_mins')
+            merge_by_keys = opts.get('merge_by_keys')
             context = opts.get('context', {})
 
             if not (logs or datatypes):
@@ -95,6 +99,8 @@ class StreamRules(object):
                                                     logs,
                                                     outputs,
                                                     req_subkeys,
+                                                    merge_window_mins,
+                                                    merge_by_keys,
                                                     context)
             return rule
         return decorator
@@ -450,7 +456,9 @@ class StreamRules(object):
                 'rule_description': rule.rule_function.__doc__ or DEFAULT_RULE_DESCRIPTION,
                 'log_source': str(payload.log_source),
                 'log_type': payload.type,
-                'outputs': list(all_outputs), # TODO: @austinbyers - change this to a set
+                'merge_by_keys': rule.merge_by_keys,
+                'merge_window_mins': rule.merge_window_mins,
+                'outputs': all_outputs,
                 'source_service': payload.service(),
                 'source_entity': payload.entity,
                 'context': rule.context}

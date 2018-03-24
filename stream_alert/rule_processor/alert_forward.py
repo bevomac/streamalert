@@ -39,7 +39,7 @@ class AlertForwarder(object):
     @staticmethod
     def dynamo_record(alert):
         """Convert an alert (dict) into a Dynamo item (dict)."""
-        return {
+        record = {
             'RuleName': alert['rule_name'],
             'AlertID': alert['id'],
             # ISO 8601 datetime format
@@ -50,10 +50,15 @@ class AlertForwarder(object):
             'RuleDescription': alert['rule_description'],
             'SourceEntity': alert['source_entity'],
             'SourceService': alert['source_service'],
-            'Outputs': set(alert['outputs']),
+            'Outputs': alert['outputs'],
             # Compact JSON encoding (no extra spaces)
             'Record': json.dumps(alert['record'], separators=(',', ':'))
         }
+        if alert['merge_by_keys']:
+            record['MergeByKeys'] = alert['merge_by_keys']
+        if alert['merge_window_mins']:
+            record['MergeWindowMins'] = alert['merge_window_mins']
+        return record
 
     def _send_to_dynamo(self, alerts):
         """Write alerts in batches to Dynamo."""
